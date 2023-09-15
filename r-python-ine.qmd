@@ -1,0 +1,349 @@
+---
+title: "3R4EDI: R para la Empresa, Docencia e Investigación "
+subtitle: "R-Quixote"
+author: "Julián González y Gema Fernández-Avilés"
+date: "`r Sys.Date()`"
+bibliography: biblio.bib
+format:
+  revealjs:
+    theme: theme-dds.scss
+    scrollable: true
+    toc-title: Index
+    toc: false
+    slide-number: c/t
+    fig-align: center
+    show-slide-number: all
+    transition: fade
+    background-transition: fade
+    height: 900
+    width: 1600
+    fontcolor: "#262d36"
+    highlight-style: ayu-mirage
+    multiplex: true
+    embed-resources: true
+    code-overflow: scroll
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    out-width: "50%"
+code-link: true
+execute:
+  code-overflow: scroll
+  echo: true
+  freeze: auto
+  eval: true
+  fig-height: 6
+  warning: false
+  code-fold: true
+  comment: "#>"
+  code-line-numbers: true
+  code-copy: true
+---
+
+#  {#title-slide data-menu-title="R, docencia y ciencia de datos"} 
+
+[R]{.custom-title-1} [Phython]{.custom-title-2} [Julián Gómez y Gema Fernández-Avilés]{.custom-author}
+
+
+
+```{r}
+#| echo: false
+library(scales)
+library(knitr)
+library(kableExtra)
+
+options(dplyr.print_min = 6, dplyr.print_max = 6)
+ggplot2::theme_set(ggplot2::theme_gray(base_size = 18))
+```
+
+
+## TODO
+
+Tiempo 10 min
+
+-   Hacer análisis en R y Phyton
+
+-   Conclusiones
+
+
+
+# ¿R o Python? {background-color="#017eae"}
+
+## No es cuestión de R o Pythón...
+
+::: columns
+::: {.column width="50%"}
+![Julián](img/julian.png){width="50%"}
+
+- CEO y empresario? (Analyticae SL).
+- Toledo.
+- Python.
+- Arreglar un poco esto, poner algo más y gracioso
+
+
+
+:::
+
+::: {.column width="50%"}
+![Gema](img/gema.jpg){width="30%"}
+
+- Catedrática de Estadística (UCLM).
+
+- Madrid.
+
+- R.
+- Arreglar un poco esto, poner algo más y gracioso
+
+:::
+:::
+
+
+## Versiones...
+
+![Imagen tomada de: https://datasciencebox.org](img/04-lego-steps.png)
+
+## Versiones... con mensajes legibles para los humanos
+
+![Imagen tomada de: https://datasciencebox.org](img/04-lego-steps-commit-messages.png)
+
+## ¿Por qué necesitamos un control de versiones?
+
+![Imagen tomada de: https://datasciencebox.org](img/04-phd_comics_vc.png)
+
+
+
+# Decisiones previas `r emo::ji("question")` {background-color="#017eae"}
+
+Rstudio y GitHub: control de versiones 
+
+::: columns
+::: {.column width="50%"}
+
+![Imagen tomada de: https://posit.co/products/cloud/](img/posit_cloud.png){width="40%"}
+:::
+
+::: {.column width="50%"}
+![Imagen tomada de: https://posit.co/products/cloud/](img/04-github-logo.png){width="30%"}
+:::
+:::
+
+## 1. RStudio cloud
+
+#### *Bring along your favorite data science tools to the cloud, including RStudio, R, and Python.*
+
+![RStudio cloud](img/posit_gema.png){width="30%"}
+
+
+## 2. GitHub
+
+
+-   Git es un sistema de control de versiones, como las funciones de "Control de cambios" de Microsoft Word.
+
+-   Es el más popular.
+-   GitHub el "alojamiento" de los proyectos Git de internet -- como DropBox mucho mejor.
+
+![RStudio cloud](img/github_gema.png){width="30%"}
+
+
+## 3. ¿Cómo trabajar con Git y GitHub en Rstudio?
+
+![Imagen tomada de: https://datasciencebox.org](img/04-whole-game-01.png)
+
+## 3. ¿Cómo trabajar con Git y GitHub en Rstudio?
+
+![Imagen tomada de: https://datasciencebox.org](img/04-whole-game-02.png)
+
+## 3. ¿Cómo trabajar con Git y GitHub en Rstudio?
+
+![Imagen tomada de: https://datasciencebox.org](img/04-whole-game-03.png)
+
+## 3. ¿Cómo trabajar con Git y GitHub en Rstudio?
+
+![Imagen tomada de: https://datasciencebox.org](img/04-whole-game-04.png)
+
+
+
+## Veamos un caso real y sencillo
+
+![Imagen tomada de: https://ine.es](img/censo.png)
+
+## Metodología CRIPS-DM para ciencia de datos: 6 pasos básicos
+
+![Imagen tomada de: https://ruthsitorus.medium.com/mempelajari-modeling-cross-industry-standard-process-for-data-mining-atau-crisp-dm-166735c14159](img/crisp-dm.png)
+
+
+
+
+## Etapa 1: entendimiento del negocio: 
+
+algo del censo del INE
+
+::: panel-tabset
+
+### R
+```{r}
+
+```
+
+### Python
+```{python}
+
+```
+:::
+
+
+
+
+## Etapa 2: Entendimiento de los datos
+
+Webscraping y estructura de los datos
+
+::: panel-tabset
+### R
+
+```{r}
+library(httr)
+
+# Url base del servio API del Censo
+url <- "https://www.ine.es/Censo2021/api"
+
+# Consulta a la base de datos
+# Resultados por provincia. PoblaciÃ³n por sexo, nacionalidad (española/extranjera) y edad (grandes grupos)
+consulta <- '{"idioma":"ES", "metrica":["SPERSONAS"], "tabla":"per.ppal", "variables": ["ID_RESIDENCIA_N1", "ID_NACIONALIDAD_N1", "ID_SEXO", "ID_GRAN_GRUPO_EDAD"]}'
+
+# Llamada a la API utilizando método POST
+response <- VERB("POST", url, 
+                  body =  consulta, 
+                  content_type("application/json"),
+                  accept("application/json"),
+                  encode = "json")
+
+
+# Obtenemos el contenido de la respuesta, que contiene tanto los datos como los metadatos
+contenido <- content(response, "text")
+
+# La cadena de texto internamente es un json
+contenido <- jsonlite::fromJSON(contenido)
+
+# Data frame con los datos
+datos <- contenido$data
+```
+
+
+### Python
+```{python}
+#| eval: true
+import requests
+import json
+
+# Url base del servio API del Censo
+url = 'https://www.ine.es/Censo2021/api'
+
+# Datos en formato JSON que enviaremos en la solicitud POST
+data = {
+    'idioma':'ES',
+    'metrica':['SPERSONAS'],
+    'tabla':'per.ppal',
+    'variables': ['ID_RESIDENCIA_N1', 'ID_NACIONALIDAD_N1', 'ID_SEXO', 'ID_GRAN_GRUPO_EDAD']
+}
+
+data_json = json.dumps(data)
+headers = {'Content-Type': 'application/json'}
+
+
+response = requests.post(url, data=data_json, headers=headers)
+  # Verificamos el código de estado de la respuesta (200 para éxito)
+if response.status_code == 200:
+    respuesta_json = response.json()
+    print('Respuesta de la API:')
+    print(respuesta_json)
+else:
+    print('Error en la solicitud. Código de estado:', response.status_code)
+```
+:::
+
+
+## Etapa 3:  Preparación de los datos
+
+::: panel-tabset
+### R
+```{r}
+
+```
+
+### Python
+```{python}
+
+```
+:::
+
+
+
+
+## Etapa 4:  Modelado
+
+::: panel-tabset
+### R
+```{r}
+
+```
+
+### Python
+```{python}
+
+```
+:::
+
+
+
+## Etapa 5:  Evaluación
+
+::: panel-tabset
+### R
+```{r}
+
+```
+
+### Python
+```{python}
+
+```
+:::
+
+
+## Etapa 6:  Despliegue
+
+::: panel-tabset
+### R
+```{r}
+
+```
+
+### Python
+```{python}
+
+```
+:::
+
+
+
+## Conclusiones
+
++ una
+
++ dos...
+
+
+
+
+
+## Referencias
+
+-   [Happy Git and GitHub for the useR](https://happygitwithr.com/). Libro imprescindible.
+
+-   [Cómo usar Git/GitHub con R](http://destio.us.es/calvo/asignaturas/ge_esco/tutorialusargitgithubrstudio/UsarGitGithubconRStudio.html). Muy didáctico, sencillo y en español.
+
+- Alguna de R
+
+- Alguna de python
