@@ -1,7 +1,7 @@
 ---
 title: "3R4EDI: R para la Empresa, Docencia e Investigación "
-subtitle: "R-Quixote"
-author: "Julián González y Gema Fernández-Avilés"
+subtitle: "R-Quixote. Almagro, 19 y 20 de Octubre de 2023"
+author: "Julián Gómez y Gema Fernández-Avilés"
 date: "`r Sys.Date()`"
 bibliography: biblio.bib
 format:
@@ -43,7 +43,7 @@ execute:
 
 #  {#title-slide data-menu-title="R, docencia y ciencia de datos"} 
 
-[R]{.custom-title-1} [Phython]{.custom-title-2} [Julián Gómez y Gema Fernández-Avilés]{.custom-author}
+[Viaje al centro del dato]{.custom-title-1} [R + Python]{.custom-title-2} [Julián Gómez y Gema Fernández-Avilés]{.custom-author}
 
 
 
@@ -58,15 +58,6 @@ ggplot2::theme_set(ggplot2::theme_gray(base_size = 18))
 ```
 
 
-## TODO
-
-Tiempo 10 min
-
--   Hacer análisis en R y Phyton
-
--   Conclusiones
-
-
 
 # ¿R o Python? {background-color="#017eae"}
 
@@ -74,27 +65,19 @@ Tiempo 10 min
 
 ::: columns
 ::: {.column width="50%"}
-![Julián](img/julian.png){width="50%"}
+![Julián Gómez](img/julian.png){width="35%"}
 
-- CEO y empresario? (Analyticae SL).
-- Toledo.
+- CTO y co-fundador de Analyticae SL.
+- Vive en Toledo y trabaja en Madrid.
 - Python.
-- Arreglar un poco esto, poner algo más y gracioso
-
-
-
 :::
 
 ::: {.column width="50%"}
-![Gema](img/gema.jpg){width="30%"}
+![Gema Fernández-Avilés](img/gema.jpg){width="30%"}
 
 - Catedrática de Estadística (UCLM).
-
-- Madrid.
-
-- R.
-- Arreglar un poco esto, poner algo más y gracioso
-
+- Vive en Madrid y trabaja en Toledo.
+- **R.**
 :::
 :::
 
@@ -164,7 +147,7 @@ Rstudio y GitHub: control de versiones
 
 
 
-## Veamos un caso real y sencillo
+## 4. Veamos un caso real y sencillo  {background-color="#017eae"}
 
 ![Imagen tomada de: https://ine.es](img/censo.png)
 
@@ -175,24 +158,14 @@ Rstudio y GitHub: control de versiones
 
 
 
-## Etapa 1: entendimiento del negocio: 
-
-algo del censo del INE
-
-::: panel-tabset
-
-### R
-```{r}
-
-```
-
-### Python
-```{python}
-
-```
-:::
+## Etapa 1: Entendimiento del negocio
 
 
++ El censo es la operación estadística de mayor tradición que existe.
+
++  En España, durante los reinos de taifas (entre los siglos XI y XIII) ya se utilizaban para establecer los tributos que debían pagar cristianos, musulmanes y judíos.
+
++ A partir del censo de población se obtiene información sobre la cifra de población de un país, su estructura, crecimiento y características económicas, sociales y demográficas con un elevado nivel de detalle.
 
 
 ## Etapa 2: Entendimiento de los datos
@@ -204,21 +177,19 @@ Webscraping y estructura de los datos
 
 ```{r}
 library(httr)
-
 # Url base del servio API del Censo
-url <- "https://www.ine.es/Censo2021/api"
+url <- "https://www.ine.es/Censo2021/api"  
 
-# Consulta a la base de datos
-# Resultados por provincia. PoblaciÃ³n por sexo, nacionalidad (española/extranjera) y edad (grandes grupos)
+# Consulta a la base de datos. 
+# Resultados por provincia. Población por sexo, nacionalidad (española/extranjera) y edad (grandes grupos)
 consulta <- '{"idioma":"ES", "metrica":["SPERSONAS"], "tabla":"per.ppal", "variables": ["ID_RESIDENCIA_N1", "ID_NACIONALIDAD_N1", "ID_SEXO", "ID_GRAN_GRUPO_EDAD"]}'
 
-# Llamada a la API utilizando método POST
+# Llamada a la API utilizando el método POST
 response <- VERB("POST", url, 
                   body =  consulta, 
                   content_type("application/json"),
                   accept("application/json"),
                   encode = "json")
-
 
 # Obtenemos el contenido de la respuesta, que contiene tanto los datos como los metadatos
 contenido <- content(response, "text")
@@ -236,7 +207,8 @@ datos <- contenido$data
 #| eval: true
 import requests
 import json
-
+import pandas as pd
+import numpy as np
 # Url base del servio API del Censo
 url = 'https://www.ine.es/Censo2021/api'
 
@@ -251,13 +223,11 @@ data = {
 data_json = json.dumps(data)
 headers = {'Content-Type': 'application/json'}
 
-
 response = requests.post(url, data=data_json, headers=headers)
   # Verificamos el código de estado de la respuesta (200 para éxito)
 if response.status_code == 200:
-    respuesta_json = response.json()
-    print('Respuesta de la API:')
-    print(respuesta_json)
+    contenido = response.json()
+    datos = pd.DataFrame (contenido['data'])
 else:
     print('Error en la solicitud. Código de estado:', response.status_code)
 ```
@@ -269,16 +239,83 @@ else:
 ::: panel-tabset
 ### R
 ```{r}
+library(dplyr)
+datos_originales <- datos
+correspondencia_residencia <- c(
+  'Andalucía'                  = 1,
+  'Aragón'                     = 2,
+  'Asturias, Principado de'    = 3, 
+  'Balears, Illes'             = 4,
+  'Canarias'                   = 5,
+  'Cantabria'                  = 6,
+  'Castilla y León'            = 7,
+  'Castilla - La Mancha'       = 8,
+  'Cataluña'                   = 9,
+  'Comunitat Valenciana'       = 10,
+  'Extremadura'                = 11,
+  'Galicia'                    = 12,
+  'Madrid, Comunidad de'       = 13,
+  'Murcia, Región de'          = 14,
+  'Navarra, Comunidad Foral de'= 15,
+  'País Vasco'                 = 16,
+  'Rioja, La'                  = 17,
+  'Ceuta'                      = 51,
+  'Melilla'                    = 52
+)
 
+# Calcular el percentil y reemplazar los valores en la columna SPERSONAS
+datos <- datos %>%
+  mutate(ID_NACIONALIDAD_N1 = as.numeric(factor(ID_NACIONALIDAD_N1)),
+         ID_GRAN_GRUPO_EDAD = as.numeric(factor(ID_GRAN_GRUPO_EDAD)),
+         ID_SEXO = as.numeric(factor(ID_SEXO)),
+         ID_RESIDENCIA_N1 = as.numeric(correspondencia_residencia[ID_RESIDENCIA_N1]),
+         SPERSONAS = percent_rank(SPERSONAS))
+
+datos_escalados <- scale(datos)
+#datos_escalados
 ```
 
 ### Python
 ```{python}
+from sklearn.preprocessing import StandardScaler
 
+datos_procesados = datos.copy()
+datos_procesados.ID_GRAN_GRUPO_EDAD.replace(['Menos de 16', '16-64', '65 o más'],
+                                            [0, 1, 2], inplace=True)
+datos_procesados.ID_SEXO.replace(['Hombre', 'Mujer'],
+                                  [0, 1], inplace=True)
+datos_procesados.ID_NACIONALIDAD_N1.replace(['Española','Extranjera'],
+                                            [0, 1], inplace=True)
+datos_procesados.ID_RESIDENCIA_N1.replace(
+['Andalucía',
+ 'Aragón',
+ 'Asturias, Principado de',
+ 'Balears, Illes',
+ 'Canarias',
+ 'Cantabria',
+ 'Castilla y León',
+ 'Castilla - La Mancha',
+ 'Cataluña',
+ 'Comunitat Valenciana',
+ 'Extremadura',
+ 'Galicia',
+ 'Madrid, Comunidad de',
+ 'Murcia, Región de',
+ 'Navarra, Comunidad Foral de',
+ 'País Vasco',
+ 'Rioja, La',
+ 'Ceuta',
+ 'Melilla'],
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 51, 52], inplace=True)
+def percentile_rank(column):
+   return column.rank(pct = True)
+
+datos_procesados.SPERSONAS = percentile_rank(datos_procesados['SPERSONAS'])
+
+scaler = StandardScaler()
+datos_procesados_escalados = scaler.fit_transform(datos_procesados)
 ```
 :::
-
-
 
 
 ## Etapa 4:  Modelado
@@ -286,13 +323,23 @@ else:
 ::: panel-tabset
 ### R
 ```{r}
-
+library(factoextra)
+library(NbClust)
+fviz_nbclust(x = datos_escalados, FUNcluster = kmeans, method = "wss", k.max = 10)
+#nb <- NbClust(datos_escalados, distance = "euclidean", min.nc = 2,
+#              max.nc = 10, method = "kmeans")
 ```
 
 ### Python
 ```{python}
-
+from sklearn.cluster import KMeans
+from yellowbrick.cluster import KElbowVisualizer
+model = KMeans(random_state=123, n_init='auto')
+visualizer = KElbowVisualizer(model, k=(2,10))
+visualizer.fit(datos_procesados_escalados)
+visualizer.show()
 ```
+
 :::
 
 
@@ -302,37 +349,89 @@ else:
 ::: panel-tabset
 ### R
 ```{r}
-
+km_clusters <- eclust(x = datos_escalados, FUNcluster = "kmeans", k = 4, seed = 123,
+                      hc_metric = "euclidean", nstart = 50, graph = FALSE)
+fviz_silhouette(km_clusters, print.summary = TRUE, palette = "jco",
+                ggtheme = theme_classic())
 ```
 
 ### Python
-```{python}
 
+```{python}
+from yellowbrick.cluster import SilhouetteVisualizer
+model = KMeans(4, random_state=123, n_init='auto')
+visualizer = SilhouetteVisualizer(model, colors='yellowbrick')
+
+visualizer.fit(datos_procesados_escalados)
+visualizer.show() 
 ```
 :::
 
 
 ## Etapa 6:  Despliegue
 
+
+
+* Por ejemplo `Shiny`, en R y Python.
+
+
+
+
+## Conclusiones {.smaller}
+
 ::: panel-tabset
-### R
-```{r}
+### Ventajas
 
-```
++ **Diversidad de bibliotecas**: mientras que Python tiene bibliotecas como `Pandas`, `NumPy` y `Scikit-learn`, R cuenta con `dplyr`, `ggplot2` y `tidyverse`. Esta diversidad permite aprovechar lo mejor de ambos mundos.
 
-### Python
-```{python}
++ **Visualización de datos**: aunque Python tiene bibliotecas de visualización como Matplotlib y Seaborn, R es conocido por su capacidad superior de visualización con ggplot2.
 
-```
++ **Estadísticas avanzadas**: R fue diseñado específicamente para estadísticas, por lo que tiene una amplia variedad de paquetes estadísticos que no están disponibles o no son tan intuitivos en Python.
+
++ **Flexibilidad**: algunos paquetes y funciones están disponibles solo en uno de los lenguajes. Usar ambos garantiza que siempre tendrás la herramienta adecuada para el trabajo.
+
++ **Comunidad**: ambos lenguajes tienen comunidades activas y en crecimiento. Es decir, que es más probable obtener ayuda, independientemente del problema que tengas.
+
++ **Integración**: las integraciones con otras plataformas son mucho más habituales y sencillas desde Python, pero también algunas librerías en R dan soporte a estos temas sencillos como APIS Rest.
+
++ **Desarrollo y producción**: Python es ampliamente utilizado en el desarrollo y la producción de aplicaciones, mientras que R es excelente para el análisis y la visualización. Usar ambos te permite crear un flujo de trabajo desde el análisis hasta la producción.
+
++ **Aprendizaje**: Aprender ambos lenguajes te hace más versátil como analista o científico de datos.
+
++ **Ofertas de trabajo**: algunas empresas prefieren Python, mientras que otras prefieren R. Conocer ambos aumenta tus oportunidades en el mercado laboral.
+
++ **Actualizaciones y mejoras**: al estar en sintonía con ambas comunidades, puedes beneficiarte de las actualizaciones y mejoras en ambos lenguajes.
+
++ **Diversidad de enfoques**: cada lenguaje tiene su propia filosofía y enfoque, lo que puede proporcionar diferentes perspectivas al abordar un problema.
+
++ **Optimización**: Para ciertas tareas, uno de los lenguajes puede ser más eficiente que el otro.
+
++ **Educación**: R es ampliamente utilizado en la academia y la investigación, mientras que Python es popular en la industria. Conocer ambos te prepara para ambos mundos.
+
++ **Extensibilidad**: Ambos lenguajes se pueden extender con otros lenguajes como C y C++.
+
++ **Reproducibilidad**: R tiene un enfoque fuerte en la reproducibilidad, especialmente con herramientas como RMarkdown. Esto complementa las capacidades de Python en el mismo ámbito.
+
+
+
+### Desventajas
++ **Curva de aprendizaje**: aprender y mantenerse actualizado en ambos lenguajes puede ser abrumador.
+
++ **Integración complicada**: aunque es posible integrar ambos lenguajes, hacerlo de manera efectiva puede ser un desafío.
+
++ **Rendimiento**: usar ambos lenguajes en un proyecto puede afectar el rendimiento si no se gestiona adecuadamente.
+
++ **Mantenimiento**: Mantener código en ambos lenguajes puede ser más laborioso que centrarse en uno solo.
+
++ **Decisión**: A veces, puede ser difícil decidir qué lenguaje usar para una tarea específica, lo que puede llevar a la parálisis por análisis.
+
+
 :::
 
 
+## Consideración final
 
-## Conclusiones
-
-+ una
-
-+ dos...
+![Imagen tomada de serie de TVE](img/Quijote-Sancho.png)
 
 
 
@@ -344,6 +443,6 @@ else:
 
 -   [Cómo usar Git/GitHub con R](http://destio.us.es/calvo/asignaturas/ge_esco/tutorialusargitgithubrstudio/UsarGitGithubconRStudio.html). Muy didáctico, sencillo y en español.
 
-- Alguna de R
+- [R for Data Science (2e)](https://r4ds.hadley.nz/)
 
-- Alguna de python
+- [Python for Data Analysis, 3E](https://wesmckinney.com/book/)
